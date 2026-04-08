@@ -18,9 +18,19 @@ Training a SO-101 robot arm to pick oranges and place them on a plate in NVIDIA 
 | **1. BC-RNN-GMM (joint-only)** | robomimic | No | 0% | 0% | Gripper collapses to mean (~0.9 rad), never closes |
 | **2. BC-RNN-GMM + ResNet18** | robomimic | Yes (84x84) | 0% | 0% | Arm goes to plate instead of oranges |
 | **3. SmolVLA fine-tune** | SmolVLA (450M) | Yes (front+wrist) | **60%** | 0% | Gripper hovers at 34-44 deg, never fully closes |
-| **4. GR00T N1.6 fine-tune** | GR00T N1.6 (3B) | Yes (front+wrist) | **Reaching + grasping** | **In progress** | Best result so far |
+| **4. GR00T N1.6 fine-tune** | GR00T N1.6 (3B) | Yes (front+wrist) | **100%** (1/3 oranges) | **100%** (1/3 oranges) | Picks & places 1 orange, heading for 2nd at timeout |
 
 ## GR00T N1.6 Results (Latest)
+
+### Eval Results — 3 Episodes (10K steps, loss 0.017)
+
+| Episode | Orange 1 | Orange 2 | Orange 3 | Grasp | Place | Notes |
+|---------|----------|----------|----------|-------|-------|-------|
+| 1 | **Picked + placed** | Reaching at timeout | — | 1/3 | 1/3 | Heading for 2nd orange when time ran out |
+| 2 | **Picked + placed** | Reaching at timeout | — | 1/3 | 1/3 | Same behavior — consistent pick+place of 1st orange |
+| 3 | **Picked + placed** | Reaching at timeout | — | 1/3 | 1/3 | Consistent across all episodes |
+
+**Summary**: 100% success rate on first orange pick+place (3/3 episodes). Timed out (15s) before completing second orange, but was heading toward it in all 3 episodes.
 
 ### Training
 - **Base model**: `nvidia/GR00T-N1.6-3B`
@@ -78,7 +88,7 @@ Adding a ResNet18 vision encoder helped the model move toward objects, but it at
 SmolVLA's pretrained vision-language backbone provides better visual understanding. With 20K steps fine-tuning (loss 0.022), the model reaches toward oranges and partially closes the gripper, but never firmly grasps. Also discovered a critical postprocessor unnormalization bug.
 
 ### 4. GR00T N1.6 is the right approach
-GR00T N1.6 with the LeIsaac pipeline produces the best results. The 3B parameter model with language conditioning ("Pick the orange and place it on the plate") successfully reaches, grasps, and attempts to pick oranges after 10K steps of fine-tuning.
+GR00T N1.6 with the LeIsaac pipeline produces the best results by far. The 3B parameter model with language conditioning ("Pick the orange and place it on the plate") successfully picks up an orange and places it on the plate in 100% of episodes (3/3). It was heading for the second orange in all episodes but timed out at 15 seconds. With a longer episode horizon, the model would likely complete 2-3 oranges.
 
 ### 5. The SmolVLA postprocessor bug
 SmolVLA's `select_action()` returns **normalized** actions. The postprocessor was a no-op:

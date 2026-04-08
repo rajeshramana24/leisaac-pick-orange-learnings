@@ -135,4 +135,4 @@ Used a background bash script to detect crashes within 30 seconds:
 | BC-RNN-GMM | ~1M | 200 ep | -13.84 | 0% | 0% | No vision, gripper collapse |
 | BC-RNN + ResNet18 | ~12M | 200 ep | -14.30 | 0% | 0% | Wrong object attention |
 | SmolVLA | 450M | 20K | 0.022 | 60% | 0% | Gripper never fully closes |
-| **GR00T N1.6** | **3B** | **10K** | **0.017** | **Reaching + grasping** | **In progress** | **Best result** |
+| **GR00T N1.6** | **3B** | **10K** | **0.017** | **100% (1/3)** | **100% (1/3)** | **Picks + places 1 orange, heading for 2nd at timeout** |
